@@ -41,10 +41,10 @@ export default {
           .replace(/{\\pos.*}/g, '')
       } else if (format === 'ass') {
         return source
-          .replace(/{.*}/g, '')
-          .replace(/[^]*\[Events\]\s*\n/, '')
-          .replace(/Format:.*\n/, '')
-          .replace(/Dialogue.*,(.*p0})?/g, '\n')
+          .replace(/[^]*\[Events\]\s*/, '')
+          .replace(/Format:.*\s*/, '')
+          .replace(/Dialogue.*,,(.*p0})?/g, '\n')
+          .replace(/{.*?}/g, '')
           .replace(/\\N/g, '\n')
           .replace(/(\s*\n){3,}/g, '\n\n')
       } else {
