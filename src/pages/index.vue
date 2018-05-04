@@ -1,5 +1,5 @@
 <template>
-  <div class="container" @drop="dropFile">
+  <div class="container" @drop.prevent="dropFile">
     <div class="header">
       <div class="title">字幕转文本工具</div>
       <form class="form">
@@ -54,7 +54,6 @@ export default {
   },
   methods: {
     dropFile (e) {
-      e.preventDefault()
       const file = e.dataTransfer.files[0]
       const reader = new FileReader()
       reader.onload = this.getSourceFromFile
