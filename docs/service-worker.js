@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.2.0/workbox-sw.js");
 
 importScripts(
-  "/caption2text/precache-manifest.612f3a2d84a3e76ce3f675f9425982c6.js"
+  "/caption2text/precache-manifest.696c7a57454b15daf53da8fa14575a01.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "caption2text"});
