@@ -15,13 +15,15 @@
       </form>
     </div>
     <div class="main">
-      <textarea class="source" v-model="source" placeholder="支持文件拖入"></textarea>
-      <pre class="result" v-text="result"></pre>
+      <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
+      <pre ref="result" class="result" v-text="result"></pre>
     </div>
   </div>
 </template>
 
 <script>
+let scrollTimer
+
 export default {
   name: 'Index',
   data () {
@@ -52,6 +54,12 @@ export default {
       }
     }
   },
+  mounted () {
+    this.$nextTick(() => {
+      this.$refs.source.addEventListener('scroll', this.scrollSync)
+      this.$refs.result.addEventListener('scroll', this.scrollSync)
+    })
+  },
   methods: {
     dropFile (e) {
       const file = e.dataTransfer.files[0]
@@ -61,6 +69,18 @@ export default {
     },
     getSourceFromFile (e) {
       this.source = e.target.result
+    },
+    scrollSync (e) {
+      clearTimeout(scrollTimer)
+      const { scrollTop, scrollHeight } = e.target
+      const scrollRatio = scrollTop / scrollHeight
+      const { source, result } = this.$refs
+      const follower = e.target === source ? result : source
+      follower.removeEventListener('scroll', this.scrollSync)
+      follower.scrollTop = follower.scrollHeight * scrollRatio
+      scrollTimer = setTimeout(() => {
+        follower.addEventListener('scroll', this.scrollSync)
+      }, 300)
     }
   }
 }
