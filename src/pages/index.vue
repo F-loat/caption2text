@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @drop="dropFile">
     <div class="header">
       <div class="title">字幕转文本工具</div>
       <form class="form">
@@ -15,7 +15,7 @@
       </form>
     </div>
     <div class="main">
-      <textarea class="source" v-model="source"></textarea>
+      <textarea class="source" v-model="source" placeholder="支持文件拖入"></textarea>
       <pre class="result" v-text="result"></pre>
     </div>
   </div>
@@ -50,6 +50,18 @@ export default {
       } else {
         return source
       }
+    }
+  },
+  methods: {
+    dropFile (e) {
+      e.preventDefault()
+      const file = e.dataTransfer.files[0]
+      const reader = new FileReader()
+      reader.onload = this.getSourceFromFile
+      reader.readAsText(file)
+    },
+    getSourceFromFile (e) {
+      this.source = e.target.result
     }
   }
 }
