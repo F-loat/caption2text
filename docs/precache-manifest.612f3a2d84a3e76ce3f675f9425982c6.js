@@ -8,15 +8,15 @@ self.__precacheManifest = [
     "url": "/caption2text/js/manifest.992a3847.js"
   },
   {
-    "revision": "affa0c5081b0ac1df3ab",
-    "url": "/caption2text/js/app.affa0c50.js"
+    "revision": "a943a59f62e0c886535f",
+    "url": "/caption2text/js/app.a943a59f.js"
   },
   {
-    "revision": "2e8a2bd5e92fc982583f6004425b50eb",
+    "revision": "346009aaf6c7fc8e33c37255e05fe24e",
     "url": "/caption2text/index.html"
   },
   {
-    "revision": "affa0c5081b0ac1df3ab",
-    "url": "/caption2text/css/app.d95abeaf.css"
+    "revision": "a943a59f62e0c886535f",
+    "url": "/caption2text/css/app.85bd7dbe.css"
   }
 ];
