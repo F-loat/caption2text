@@ -35,18 +35,18 @@ export default {
       const { format, source } = this
       if (format === 'srt') {
         return source
-          .replace(/(\d+\n)/g, '')
-          .replace(/(\d+:?){3},\d+ --> (\d+:?){3},/g, '')
+          .replace(/(\d+:?){3},\d+ --> (\d+:?){3},\d?/g, '')
+          .replace(/\d+\s*\n/g, '')
           .replace(/{\\an.*}/g, '')
           .replace(/{\\pos.*}/g, '')
       } else if (format === 'ass') {
         return source
           .replace(/{.*}/g, '')
-          .replace(/[^]*\[Events\]\n/, '')
+          .replace(/[^]*\[Events\]\s*\n/, '')
           .replace(/Format:.*\n/, '')
           .replace(/Dialogue.*,(.*p0})?/g, '\n')
           .replace(/\\N/g, '\n')
-          .replace(/\n{3,}/g, '\n\n')
+          .replace(/(\s*\n){3,}/g, '\n\n')
       } else {
         return source
       }
