@@ -66,6 +66,7 @@ export default {
       const reader = new FileReader()
       reader.onload = this.getSourceFromFile
       reader.readAsText(file)
+      this.format = file.name.replace(/.*\./, '')
     },
     getSourceFromFile (e) {
       this.source = e.target.result
