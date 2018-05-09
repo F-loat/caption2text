@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import MaterialImage from 'material-image'
+
 let scrollTimer
 
 export default {
@@ -56,6 +58,7 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
+      new MaterialImage()
       this.$refs.source.addEventListener('scroll', this.scrollSync)
       this.$refs.result.addEventListener('scroll', this.scrollSync)
     })
@@ -92,6 +95,7 @@ export default {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: rgba(255, 255, 255, .8)
 }
 .header {
   width: 100%;
@@ -101,6 +105,7 @@ export default {
   align-items: center;
   box-sizing: border-box;
   justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 6px rgba(0, 0, 0, .1)
 }
 .form {
   display: flex;
@@ -115,7 +120,6 @@ export default {
 .main {
   flex: 1;
   display: flex;
-  border-top: 1px solid #ccc;
 }
 .source, .result {
   flex: 1;
@@ -127,20 +131,13 @@ export default {
   overflow: auto;
   border: none;
   outline: none;
+  background: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1)
 }
 
 @media screen and (max-width: 540px) {
   .main {
     flex-direction: column;
-  }
-  .source {
-    border-bottom: 1px solid #ccc;
-  }
-}
-
-@media screen and (min-width: 540px) {
-  .source {
-    border-right: 1px solid #ccc;
   }
 }
 </style>
