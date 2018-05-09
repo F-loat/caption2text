@@ -12,7 +12,22 @@
       <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
       <textarea ref="result" class="result" v-model="result" placeholder="支持文本导出"></textarea>
     </div>
-  </div>
+    <v-btn color="pink" dark fixed bottom right fab @click.stop="dialog = true">
+      <v-icon>get_app</v-icon>
+    </v-btn>
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card>
+        <v-card-title>导出文本</v-card-title>
+        <v-card-text>
+          <v-text-field label="文件名" v-model="filename"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" flat @click.stop="dialog = false">取消</v-btn>
+          <v-btn color="primary" flat @click.stop="downFile">下载</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-snackbar :timeout="2000" v-model="snackbar.show" top>
       {{ snackbar.text }}
       <v-btn flat color="pink" @click.native="snackbar.show = false">Close</v-btn>
@@ -31,11 +46,12 @@ export default {
     return {
       format: 'ass',
       source: '',
-      source: ''
+      filename: '',
       snackbar: {
         show: false,
         text: ''
       },
+      dialog: false
     }
   },
   computed: {
@@ -77,12 +93,38 @@ export default {
       reader.onload = this.getSourceFromFile
       reader.readAsText(file)
       this.format = file.name.replace(/.*\./, '')
+      this.filename = file.name.replace(`.${this.format}`, '.txt')
+      this.snackbar = {
         show: true,
         text: '字幕导入成功'
       }
     },
     getSourceFromFile (e) {
       this.source = e.target.result
+    },
+    downFile () {
+      if (!this.filename) {
+        this.snackbar = {
+          show: true,
+          text: '请输入文件名'
+        }
+        return
+      }
+
+      const eleLink = document.createElement('a')
+      eleLink.download = this.filename
+      eleLink.style.display = 'none'
+      const blob = new Blob([this.result.replace(/\r?\n/g, '\r\n')])
+      eleLink.href = URL.createObjectURL(blob)
+      document.body.appendChild(eleLink)
+      eleLink.click()
+      document.body.removeChild(eleLink)
+
+      this.dialog = false
+      this.snackbar = {
+        show: true,
+        text: '文本导出成功'
+      }
     },
     scrollSync (e) {
       clearTimeout(scrollTimer)
