@@ -1,7 +1,5 @@
 <template>
-  <div id="app">
-    <Index />
-  </div>
+  <Index />
 </template>
 
 <script>
@@ -14,10 +12,3 @@ export default {
   }
 }
 </script>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-}
-</style>

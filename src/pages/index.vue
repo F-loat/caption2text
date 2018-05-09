@@ -1,24 +1,23 @@
 <template>
-  <div class="container" @drop.prevent="dropFile">
-    <div class="header">
-      <div class="title">字幕转文本工具</div>
-      <form class="form">
-        <div class="form-title">字幕格式：</div>
-        <div class="form-item">
-          <label for="ass">ass</label>
-          <input v-model="format" type="radio" value="ass" name="ass" />
-        </div>
-        <div class="form-item">
-          <label for="srt">srt</label>
-          <input v-model="format" type="radio" value="srt" name="srt" />
-        </div>
-      </form>
-    </div>
-    <div class="main">
+  <v-app>
+    <v-toolbar dark color="primary">
+      <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon dark disabled>{{format}}</v-btn>
+      <v-btn icon dark @click="switchFormat">
+        <v-icon>swap_horiz</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <div class="main" @drop.prevent="dropFile">
       <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
       <textarea ref="result" class="result" v-model="result" placeholder="支持文本导出"></textarea>
     </div>
   </div>
+    <v-snackbar :timeout="2000" v-model="snackbar.show" top>
+      {{ snackbar.text }}
+      <v-btn flat color="pink" @click.native="snackbar.show = false">Close</v-btn>
+    </v-snackbar>
+  </v-app>
 </template>
 
 <script>
@@ -31,7 +30,12 @@ export default {
   data () {
     return {
       format: 'ass',
+      source: '',
       source: ''
+      snackbar: {
+        show: false,
+        text: ''
+      },
     }
   },
   computed: {
@@ -64,12 +68,18 @@ export default {
     })
   },
   methods: {
+    switchFormat () {
+      this.format = this.format === 'ass' ? 'srt' : 'ass'
+    },
     dropFile (e) {
       const file = e.dataTransfer.files[0]
       const reader = new FileReader()
       reader.onload = this.getSourceFromFile
       reader.readAsText(file)
       this.format = file.name.replace(/.*\./, '')
+        show: true,
+        text: '字幕导入成功'
+      }
     },
     getSourceFromFile (e) {
       this.source = e.target.result
@@ -91,30 +101,8 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: rgba(255, 255, 255, .8)
-}
-.header {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  padding: 10px;
-  align-items: center;
-  box-sizing: border-box;
-  justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 6px rgba(0, 0, 0, .1)
-}
-.form {
-  display: flex;
-}
-.form-item {
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  margin-right: 5px;
+#app {
+  background-color: rgba(255, 255, 255, .9);
 }
 
 .main {
@@ -131,7 +119,6 @@ export default {
   overflow: auto;
   border: none;
   outline: none;
-  background: none;
   box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1)
 }
 
