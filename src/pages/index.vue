@@ -16,7 +16,7 @@
     </div>
     <div class="main">
       <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
-      <pre ref="result" class="result" v-text="result"></pre>
+      <textarea ref="result" class="result" v-model="result" placeholder="支持文本导出"></textarea>
     </div>
   </div>
 </template>
