@@ -7,6 +7,11 @@
       <v-btn icon dark @click="switchFormat">
         <v-icon>swap_horiz</v-icon>
       </v-btn>
+      <a href="https://github.com/F-loat/caption2text" target="_blank">
+        <v-btn icon dark @click="switchFormat">
+          <img src="@/assets/github.svg" />
+        </v-btn>
+      </a>
     </v-toolbar>
     <div class="main" @drop.prevent="dropFile">
       <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
