@@ -8,16 +8,12 @@ self.__precacheManifest = [
     "url": "/caption2text/js/manifest.992a3847.js"
   },
   {
-    "revision": "1bd3113f6e2c7d319a13",
-    "url": "/caption2text/js/app.1bd3113f.js"
+    "revision": "21194894782440680c56",
+    "url": "/caption2text/js/app.21194894.js"
   },
   {
-    "revision": "2bc49b2b9bffddf83628b7b4ef5bbead",
+    "revision": "9cc5d2453367f7651926fb4924216f54",
     "url": "/caption2text/index.html"
-  },
-  {
-    "revision": "56fd963a1b8e015697e4489d06de28d4",
-    "url": "/caption2text/img/github.56fd963a.svg"
   },
   {
     "revision": "e79bfd88537def476913f3ed52f4f4b3",
@@ -36,7 +32,7 @@ self.__precacheManifest = [
     "url": "/caption2text/fonts/MaterialIcons-Regular.012cf6a1.woff"
   },
   {
-    "revision": "1bd3113f6e2c7d319a13",
-    "url": "/caption2text/css/app.b5f98a89.css"
+    "revision": "21194894782440680c56",
+    "url": "/caption2text/css/app.1a409aff.css"
   }
 ];
