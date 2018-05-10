@@ -7,7 +7,12 @@ import './registerServiceWorker'
 
 Vue.config.productionTip = false
 
-Vue.use(Vuetify)
+Vue.use(Vuetify, {
+  theme: {
+    primary: '#474a4f',
+    secondary: '#ff5252'
+  }
+})
 
 new Vue({
   render: h => h(App)
