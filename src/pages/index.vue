@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app v-resize="resizeHandler">
     <v-toolbar dark color="primary">
       <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -35,7 +35,11 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar :timeout="2000" v-model="snackbar.show" top>
+    <v-snackbar
+      :timeout="2000"
+      v-model="snackbar.show"
+      :top="windowSize.x >= 600"
+      :bottom="windowSize.x < 600">
       {{ snackbar.text }}
       <v-btn flat color="secondary" @click.native="snackbar.show = false">Close</v-btn>
     </v-snackbar>
@@ -51,6 +55,10 @@ export default {
   name: 'Index',
   data () {
     return {
+      windowSize: {
+        x: window.innerWidth,
+        y: window.innerHeight
+      },
       format: 'ass',
       source: '',
       filename: '',
@@ -86,11 +94,15 @@ export default {
   mounted () {
     this.$nextTick(() => {
       new MaterialImage()
+      console.log(this.$parent)
       this.$refs.source.addEventListener('scroll', this.scrollSync)
       this.$refs.result.addEventListener('scroll', this.scrollSync)
     })
   },
   methods: {
+    resizeHandler () {
+      this.windowSize = { x: window.innerWidth, y: window.innerHeight }
+    },
     switchFormat () {
       this.format = this.format === 'ass' ? 'srt' : 'ass'
     },
@@ -172,7 +184,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1)
 }
 
-@media screen and (max-width: 540px) {
+@media screen and (max-width: 600px) {
   .main {
     flex-direction: column;
   }
