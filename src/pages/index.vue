@@ -24,7 +24,11 @@
       <v-card>
         <v-card-title>导出文本</v-card-title>
         <v-card-text>
-          <v-text-field label="文件名" v-model="filename"></v-text-field>
+          <v-text-field label="文件名" v-model="filename" :suffix="`.${outputFormat}`"></v-text-field>
+          <v-radio-group label="文件格式" v-model="outputFormat" row>
+            <v-radio label="Word" value="docx"></v-radio>
+            <v-radio label="Text" value="txt"></v-radio>
+          </v-radio-group>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -46,6 +50,10 @@
 
 <script>
 import MaterialImage from 'material-image'
+import JSZip from 'jszip'
+import JSZipUtils from 'jszip-utils'
+import Docxtemplater from 'docxtemplater'
+import { saveAs } from 'file-saver'
 
 let file, scrollTimer
 
@@ -60,6 +68,7 @@ export default {
       encoding: 'utf-8',
       format: 'ass',
       source: '',
+      outputFormat: 'docx',
       filename: '',
       snackbar: {
         show: false,
@@ -114,7 +123,7 @@ export default {
       reader.onload = this.getSourceFromFile
       reader.readAsText(file, this.encoding)
       this.format = file.name.replace(/.*\./, '')
-      this.filename = file.name.replace(`.${this.format}`, '.txt')
+      this.filename = file.name.replace(`.${this.format}`, '')
       this.snackbar = {
         show: true,
         text: '字幕导入成功'
@@ -123,7 +132,7 @@ export default {
     getSourceFromFile (e) {
       this.source = e.target.result
     },
-    downFile () {
+    async downFile () {
       if (!this.filename) {
         this.snackbar = {
           show: true,
@@ -132,20 +141,41 @@ export default {
         return
       }
 
-      const eleLink = document.createElement('a')
-      eleLink.download = this.filename
-      eleLink.style.display = 'none'
-      const blob = new Blob([this.result.replace(/\r?\n/g, '\r\n')])
-      eleLink.href = URL.createObjectURL(blob)
-      document.body.appendChild(eleLink)
-      eleLink.click()
-      document.body.removeChild(eleLink)
+      const { filename, outputFormat } = this
+
+      let outputBlob
+      if (outputFormat === 'docx') {
+        outputBlob = await this.generateDoc()
+      } else {
+        outputBlob = new Blob([this.result.replace(/\r?\n/g, '\r\n')])
+      }
+
+      saveAs(outputBlob, `${filename}.${outputFormat}`)
 
       this.dialog = false
       this.snackbar = {
         show: true,
         text: '文本导出成功'
       }
+    },
+    generateDoc () {
+      return new Promise((resolve, reject) => {
+        JSZipUtils.getBinaryContent('template.docx', (err, content) => {
+          if (err) return reject(err)
+          const zip = new JSZip(content)
+          const doc = new Docxtemplater().loadZip(zip)
+          doc.setData({
+            author: 'F-loat',
+            content: this.result.split('\n').map(text => ({ text }))
+          })
+          doc.render()
+          const output = doc.getZip().generate({
+            type: 'blob',
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          })
+          resolve(output)
+        })
+      })
     },
     scrollSync (e) {
       clearTimeout(scrollTimer)
