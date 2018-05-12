@@ -1,18 +1,18 @@
 self.__precacheManifest = [
   {
-    "revision": "83186372c857d0ab82cb",
-    "url": "/caption2text/js/vendor.83186372.js"
+    "revision": "372c909c0d14d383cc98e1f36fa24dc0",
+    "url": "/caption2text/template.docx"
   },
   {
-    "revision": "992a3847a6e37526a52e",
-    "url": "/caption2text/js/manifest.992a3847.js"
+    "revision": "374957fa694bacffc4d0",
+    "url": "/caption2text/js/vendors~app.374957fa.js"
   },
   {
-    "revision": "3931af1af8d51be32698",
-    "url": "/caption2text/js/app.3931af1a.js"
+    "revision": "d62c494071e0f714e64c",
+    "url": "/caption2text/js/app.d62c4940.js"
   },
   {
-    "revision": "ad002f88b37df97156229d3a20c4fbac",
+    "revision": "f4f1b77dcd7f5e8bf3750d88c16267ec",
     "url": "/caption2text/index.html"
   },
   {
@@ -32,7 +32,11 @@ self.__precacheManifest = [
     "url": "/caption2text/fonts/MaterialIcons-Regular.012cf6a1.woff"
   },
   {
-    "revision": "3931af1af8d51be32698",
-    "url": "/caption2text/css/app.18f3b814.css"
+    "revision": "374957fa694bacffc4d0",
+    "url": "/caption2text/css/vendors~app.0.bf1d969f.css"
+  },
+  {
+    "revision": "d62c494071e0f714e64c",
+    "url": "/caption2text/css/app.0e6718e3.css"
   }
 ];
