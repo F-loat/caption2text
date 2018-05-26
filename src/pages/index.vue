@@ -4,7 +4,7 @@
       <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn flat dark @click="switchEncoding">{{encoding}}</v-btn>
-      <v-btn icon dark @click="switchFormat">{{format}}</v-btn>
+      <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
           <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true">
@@ -14,8 +14,8 @@
       </a>
     </v-toolbar>
     <div class="main" @drop.prevent="dropFile">
-      <textarea ref="source" class="source" v-model="source" placeholder="支持文件拖入"></textarea>
-      <textarea ref="result" class="result" v-model="result" placeholder="支持文本导出"></textarea>
+      <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入"></textarea>
+      <pre ref="result" class="result" :class="{ holder: !files[0].source }">{{getResult(files[0].source) || '支持批量导出'}}</pre>
     </div>
     <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
       <v-icon>get_app</v-icon>
@@ -24,7 +24,11 @@
       <v-card>
         <v-card-title>导出文本</v-card-title>
         <v-card-text>
-          <v-text-field label="文件名" v-model="filename" :suffix="`.${outputFormat}`"></v-text-field>
+          <v-text-field
+            v-for="file of files" :key="file.name"
+            label="文件名"
+            v-model="file.name"
+            :suffix="`.${outputFormat}`"></v-text-field>
           <v-radio-group label="文件格式" v-model="outputFormat" row>
             <v-radio label="Word" value="docx"></v-radio>
             <v-radio label="Text" value="txt"></v-radio>
@@ -66,10 +70,11 @@ export default {
         y: window.innerHeight
       },
       encoding: 'utf-8',
-      format: 'ass',
-      source: '',
       outputFormat: 'docx',
-      filename: '',
+      files: [{
+        format: 'ass',
+        source: ''
+      }],
       snackbar: {
         show: false,
         text: ''
@@ -77,9 +82,16 @@ export default {
       dialog: false
     }
   },
-  computed: {
-    result () {
-      const { format, source } = this
+  mounted () {
+    this.$nextTick(() => {
+      new MaterialImage()
+      this.$refs.source.addEventListener('scroll', this.scrollSync)
+      this.$refs.result.addEventListener('scroll', this.scrollSync)
+    })
+  },
+  methods: {
+    getResult (source) {
+      const { format } = this
       if (format === 'srt') {
         return source
           .replace(/(\d+:?){3},\d+ --> (\d+:?){3},\d?/g, '')
@@ -97,16 +109,7 @@ export default {
       } else {
         return source
       }
-    }
-  },
-  mounted () {
-    this.$nextTick(() => {
-      new MaterialImage()
-      this.$refs.source.addEventListener('scroll', this.scrollSync)
-      this.$refs.result.addEventListener('scroll', this.scrollSync)
-    })
-  },
-  methods: {
+    },
     resizeHandler () {
       this.windowSize = { x: window.innerWidth, y: window.innerHeight }
     },
@@ -118,39 +121,56 @@ export default {
       this.format = this.format === 'ass' ? 'srt' : 'ass'
     },
     dropFile (e, f) {
-      file = f || e.dataTransfer.files[0]
-      const reader = new FileReader()
-      reader.onload = this.getSourceFromFile
-      reader.readAsText(file, this.encoding)
-      this.format = file.name.replace(/.*\./, '')
-      this.filename = file.name.replace(`.${this.format}`, '')
+      const files = f ? [f] : e.dataTransfer.files
+      for (let i = 0; i < files.length; i += 1) {
+        const file = {}
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          file.source = e.target.result
+        }
+        reader.readAsText(files[i], this.encoding)
+        file.format = files[i].name.replace(/.*\./, '')
+        file.name = files[i].name.replace(`.${file.format}`, '')
+        this.files[i] = file
+      }
+      if (this.files.length > 1) {
+        this.dialog = true
+      }
       this.snackbar = {
         show: true,
         text: '字幕导入成功'
       }
     },
-    getSourceFromFile (e) {
-      this.source = e.target.result
-    },
     async downFile () {
-      if (!this.filename) {
-        this.snackbar = {
-          show: true,
-          text: '请输入文件名'
+      const { files, outputFormat } = this
+
+      for (const file of files) {
+        if (!file.name) {
+          this.snackbar = {
+            show: true,
+            text: '请输入文件名'
+          }
+          continue
         }
-        return
+        const result = this.getResult(file.source)
+        let outputBlob
+        if (outputFormat === 'docx') {
+          try {
+            outputBlob = await this.generateDoc(result)
+          } catch (err) {
+            if (err) {
+              this.snackbar = {
+                show: true,
+                text: '出错了...'
+              }
+            }
+          }
+        } else {
+          outputBlob = new Blob([result.replace(/\r?\n/g, '\r\n')])
+        }
+
+        saveAs(outputBlob, `${file.name}.${outputFormat}`)
       }
-
-      const { filename, outputFormat } = this
-
-      let outputBlob
-      if (outputFormat === 'docx') {
-        outputBlob = await this.generateDoc()
-      } else {
-        outputBlob = new Blob([this.result.replace(/\r?\n/g, '\r\n')])
-      }
-
-      saveAs(outputBlob, `${filename}.${outputFormat}`)
 
       this.dialog = false
       this.snackbar = {
@@ -158,7 +178,7 @@ export default {
         text: '文本导出成功'
       }
     },
-    generateDoc () {
+    generateDoc (data) {
       return new Promise((resolve, reject) => {
         JSZipUtils.getBinaryContent('template.docx', (err, content) => {
           if (err) return reject(err)
@@ -166,7 +186,7 @@ export default {
           const doc = new Docxtemplater().loadZip(zip)
           doc.setData({
             author: 'F-loat',
-            content: this.result.split('\n').map(text => ({ text }))
+            content: data.split('\n').map(text => ({ text }))
           })
           doc.render()
           const output = doc.getZip().generate({
@@ -195,6 +215,7 @@ export default {
 
 <style scoped>
 #app {
+  height: 100vh;
   background-color: rgba(255, 255, 255, .9);
 }
 
@@ -206,6 +227,7 @@ export default {
   flex: 1;
   padding: 5px 10px;
   margin: 0;
+  color: #000;
   font-size: 14px;
   line-height: 1.2;
   word-break: hyphenate;
@@ -214,6 +236,9 @@ export default {
   outline: none;
   resize: none;
   box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1)
+}
+.result.holder {
+  color: #888;
 }
 
 @media screen and (max-width: 600px) {
