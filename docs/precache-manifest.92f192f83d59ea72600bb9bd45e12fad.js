@@ -8,11 +8,11 @@ self.__precacheManifest = [
     "url": "/caption2text/js/vendors~app.5d3059d9.js"
   },
   {
-    "revision": "32554d24916d0a4ebd63",
-    "url": "/caption2text/js/app.32554d24.js"
+    "revision": "3187954c4af4f7c1ec67",
+    "url": "/caption2text/js/app.3187954c.js"
   },
   {
-    "revision": "af1d3ecb67dcfd2079b620ea0a66a1e3",
+    "revision": "d98095d8a7a8c3b283ce26847b425f7f",
     "url": "/caption2text/index.html"
   },
   {
@@ -36,7 +36,7 @@ self.__precacheManifest = [
     "url": "/caption2text/css/vendors~app.0.bb50d91b.css"
   },
   {
-    "revision": "32554d24916d0a4ebd63",
-    "url": "/caption2text/css/app.49ecb027.css"
+    "revision": "3187954c4af4f7c1ec67",
+    "url": "/caption2text/css/app.3a88e336.css"
   }
 ];
