@@ -170,12 +170,11 @@ export default {
         }
 
         saveAs(outputBlob, `${file.name}.${outputFormat}`)
-      }
 
-      this.dialog = false
-      this.snackbar = {
-        show: true,
-        text: '文本导出成功'
+        this.snackbar = {
+          show: true,
+          text: `已导出 ${file.name}`
+        }
       }
     },
     generateDoc (data) {
