@@ -84,9 +84,10 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      new MaterialImage()
       this.$refs.source.addEventListener('scroll', this.scrollSync)
       this.$refs.result.addEventListener('scroll', this.scrollSync)
+      /* eslint-disable-next-line no-new */
+      new MaterialImage()
     })
   },
   methods: {

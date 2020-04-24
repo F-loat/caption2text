@@ -1,5 +1,8 @@
 module.exports = {
-  baseUrl: '/caption2text/',
-  outputDir: 'docs',
-  productionSourceMap: false
+  "publicPath": "/caption2text/",
+  "outputDir": "docs",
+  "productionSourceMap": false,
+  "transpileDependencies": [
+    "vuetify"
+  ]
 }
