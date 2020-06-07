@@ -10,7 +10,7 @@
   "dependencies": {
     "docxtemplater": "^3.17.6",
     "file-saver": "^2.0.2",
-    "jszip": "3.4.0",
+    "jszip": "2",
     "jszip-utils": "^0.1.0",
     "material-design-icons-iconfont": "^5.0.1",
     "material-image": "^0.2.5",
