@@ -3,6 +3,7 @@
     <v-toolbar dark color="primary">
       <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn icon dark @click="switchSource" v-text="'<-'" />
       <v-btn flat dark @click="switchEncoding">{{encoding}}</v-btn>
       <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
@@ -15,7 +16,7 @@
     </v-toolbar>
     <div class="main" @drop.prevent="dropFile">
       <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入"></textarea>
-      <pre ref="result" class="result" :class="{ holder: !files[0].source }">{{files[0].source ? getResult(files[0].source, files[0].format) : '支持批量导出'}}</pre>
+      <textarea ref="result" class="result" :class="{ holder: !files[0].source }" readonly :value="files[0].source ? getResult(files[0].source, files[0].format) : '支持批量导出'" />
     </div>
     <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
       <v-icon>get_app</v-icon>
@@ -122,6 +123,14 @@ export default {
     },
     switchFormat () {
       this.format = this.format === 'ass' ? 'srt' : 'ass'
+    },
+    switchSource () {
+      const { source, format } = this.files[0]
+      const result = this.getResult(source, format)
+      this.$set(this.files, '0', {
+        source: result,
+        format
+      })
     },
     dropFile (e, f) {
       const files = f ? [f] : e.dataTransfer.files
@@ -235,7 +244,7 @@ export default {
   margin: 0;
   color: #000;
   font-size: 14px;
-  line-height: 1.2;
+  line-height: 1.4;
   word-break: hyphenate;
   overflow: auto;
   border: none;
