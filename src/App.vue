@@ -14,6 +14,10 @@ export default {
 </script>
 
 <style>
+body {
+  background-attachment: fixed;
+}
+
 ::-webkit-scrollbar{
   display:none;
 }

@@ -15,7 +15,7 @@
     </v-toolbar>
     <div class="main" @drop.prevent="dropFile">
       <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入"></textarea>
-      <pre ref="result" class="result" :class="{ holder: !files[0].source }">{{getResult(files[0].source) || '支持批量导出'}}</pre>
+      <pre ref="result" class="result" :class="{ holder: !files[0].source }">{{files[0].source ? getResult(files[0].source, files[0].format) : '支持批量导出'}}</pre>
     </div>
     <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
       <v-icon>get_app</v-icon>
@@ -44,8 +44,8 @@
     <v-snackbar
       :timeout="2000"
       v-model="snackbar.show"
-      :top="windowSize.x >= 600"
-      :bottom="windowSize.x < 600">
+      bottom
+    >
       {{ snackbar.text }}
       <v-btn flat color="secondary" @click.native="snackbar.show = false">Close</v-btn>
     </v-snackbar>
@@ -91,8 +91,7 @@ export default {
     })
   },
   methods: {
-    getResult (source) {
-      const { format } = this
+    getResult (source = '', format) {
       if (format === 'srt') {
         return source
           .replace(/(\d+:?){3},\d+ --> (\d+:?){3},\d?/g, '')
@@ -107,6 +106,9 @@ export default {
           .replace(/{.*?}/g, '')
           .replace(/\\N/g, '\n')
           .replace(/(\s*\n){3,}/g, '\n\n')
+      } else if (format === 'txt') {
+        return source
+          .replace(/(，|。|\.)+/g, '\n')
       } else {
         return source
       }
@@ -153,7 +155,7 @@ export default {
           }
           continue
         }
-        const result = this.getResult(file.source)
+        const result = this.getResult(file.source, file.format)
         let outputBlob
         if (outputFormat === 'docx') {
           try {
@@ -176,12 +178,15 @@ export default {
           show: true,
           text: `已导出 ${file.name}`
         }
+
+        this.dialog = false
       }
     },
     generateDoc (data) {
       return new Promise((resolve, reject) => {
         JSZipUtils.getBinaryContent('template.docx', (err, content) => {
           if (err) return reject(err)
+          console.log(content)
           const zip = new JSZip(content)
           const doc = new Docxtemplater().loadZip(zip)
           doc.setData({
@@ -193,6 +198,7 @@ export default {
             type: 'blob',
             mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           })
+          console.log(output)
           resolve(output)
         })
       })
@@ -216,7 +222,7 @@ export default {
 <style scoped>
 #app {
   height: 100vh;
-  background-color: rgba(255, 255, 255, .9);
+  background: transparent;
 }
 
 .main {
@@ -235,7 +241,8 @@ export default {
   border: none;
   outline: none;
   resize: none;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1)
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1);
+  background-color: rgba(255, 255, 255, .9);
 }
 .result.holder {
   color: #888;
