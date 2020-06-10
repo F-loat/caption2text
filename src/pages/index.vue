@@ -22,7 +22,7 @@
         <input type="file" multiple @input="dropFile" />
       </v-btn>
       <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
-        <v-icon>get_app</v-icon>
+        <v-icon>mdi-arrow-down</v-icon>
       </v-btn>
     </v-content>
     <v-dialog v-model="dialog" max-width="500px">
