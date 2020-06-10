@@ -14,8 +14,21 @@
     </v-app-bar>
     <v-content>
       <div class="main" @drop.prevent="dropFile">
-        <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入" @input="resultSync" />
-        <textarea ref="result" class="result" v-model="files[0].result" placeholder="支持批量导出" />
+        <textarea
+          ref="source"
+          class="source"
+          v-model="files[0].source"
+          placeholder="支持多文件拖入"
+          spellcheck="false"
+          @input="resultSync"
+        />
+        <textarea
+          ref="result"
+          class="result"
+          v-model="files[0].result"
+          placeholder="支持批量导出"
+          spellcheck="false"
+        />
       </div>
       <v-btn class="file-btn" color="secondary" dark fixed bottom right fab>
         <v-icon>mdi-plus</v-icon>
