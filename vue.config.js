@@ -1,8 +1,7 @@
 module.exports = {
-  "publicPath": "/caption2text/",
-  "outputDir": "docs",
-  "productionSourceMap": false,
-  "transpileDependencies": [
-    "vuetify"
+  publicPath: process.env.NODE_ENV === 'production' ? '/caption2text/' : '/',
+  productionSourceMap: false,
+  transpileDependencies: [
+    'vuetify'
   ]
 }
