@@ -1,26 +1,30 @@
 <template>
   <v-app v-resize="resizeHandler">
-    <v-toolbar dark color="primary">
+    <v-app-bar app dark color="primary">
       <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon dark @click="switchSource" v-text="'<-'" />
-      <v-btn flat dark @click="switchEncoding">{{encoding}}</v-btn>
-      <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
+      <v-btn icon dark @click="sourceSync" v-text="'<-'" />
+      <v-btn text dark @click="switchEncoding">{{encoding}}</v-btn>
+      <v-btn icon dark>{{files[0].format}}</v-btn>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true">
-            <path fill-rule="evenodd" fill="#fff" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-          </svg>
+          <v-icon>mdi-github</v-icon>
         </v-btn>
       </a>
-    </v-toolbar>
-    <div class="main" @drop.prevent="dropFile">
-      <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入"></textarea>
-      <textarea ref="result" class="result" :class="{ holder: !files[0].source }" readonly :value="files[0].source ? getResult(files[0].source, files[0].format) : '支持批量导出'" />
-    </div>
-    <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
-      <v-icon>get_app</v-icon>
-    </v-btn>
+    </v-app-bar>
+    <v-content>
+      <div class="main" @drop.prevent="dropFile">
+        <textarea ref="source" class="source" v-model="files[0].source" placeholder="支持多文件拖入" @input="resultSync" />
+        <textarea ref="result" class="result" v-model="files[0].result" placeholder="支持批量导出" />
+      </div>
+      <v-btn class="file-btn" color="secondary" dark fixed bottom right fab>
+        <v-icon>mdi-plus</v-icon>
+        <input type="file" multiple @input="dropFile" />
+      </v-btn>
+      <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
+        <v-icon>get_app</v-icon>
+      </v-btn>
+    </v-content>
     <v-dialog v-model="dialog" max-width="500px">
       <v-card>
         <v-card-title>导出文本</v-card-title>
@@ -29,7 +33,8 @@
             v-for="file of files" :key="file.name"
             label="文件名"
             v-model="file.name"
-            :suffix="`.${outputFormat}`"></v-text-field>
+            :suffix="`.${outputFormat}`"
+          />
           <v-radio-group label="文件格式" v-model="outputFormat" row>
             <v-radio label="Word" value="docx"></v-radio>
             <v-radio label="Text" value="txt"></v-radio>
@@ -37,8 +42,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" flat @click.stop="dialog = false">取消</v-btn>
-          <v-btn color="primary" flat @click.stop="downFile">下载</v-btn>
+          <v-btn color="primary" text @click.stop="dialog = false">取消</v-btn>
+          <v-btn color="primary" text @click.stop="downFile">下载</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -48,7 +53,7 @@
       bottom
     >
       {{ snackbar.text }}
-      <v-btn flat color="secondary" @click.native="snackbar.show = false">Close</v-btn>
+      <v-btn text color="secondary" @click.native="snackbar.show = false">关闭</v-btn>
     </v-snackbar>
   </v-app>
 </template>
@@ -60,7 +65,13 @@ import JSZipUtils from 'jszip-utils'
 import Docxtemplater from 'docxtemplater'
 import { saveAs } from 'file-saver'
 
-let file, scrollTimer
+const readFile = (f, e) => new Promise((resolve) => {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    resolve(e.target.result)
+  }
+  reader.readAsText(f, e)
+})
 
 export default {
   name: 'Index',
@@ -74,7 +85,9 @@ export default {
       outputFormat: 'docx',
       files: [{
         format: 'ass',
-        source: ''
+        source: '',
+        result: '',
+        name: ''
       }],
       snackbar: {
         show: false,
@@ -119,31 +132,26 @@ export default {
     },
     switchEncoding () {
       this.encoding = this.encoding === 'utf-8' ? 'gb2312' : 'utf-8'
-      this.dropFile(null, file)
-    },
-    switchFormat () {
-      this.format = this.format === 'ass' ? 'srt' : 'ass'
-    },
-    switchSource () {
-      const { source, format } = this.files[0]
-      const result = this.getResult(source, format)
-      this.$set(this.files, '0', {
-        source: result,
-        format
+      const file = this.files[0]
+      if (!file.raw) return
+      this.dropFile({
+        dataTransfer: {
+          files: [file.raw]
+        }
       })
     },
-    dropFile (e, f) {
-      const files = f ? [f] : e.dataTransfer.files
+    async dropFile (e) {
+      const files = e.target.files || e.dataTransfer.files
       for (let i = 0; i < files.length; i += 1) {
-        const file = {}
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          file.source = e.target.result
+        const source = await readFile(files[i], this.encoding)
+        const format = files[i].name.replace(/.*\./, '')
+        const name = files[i].name.replace(`.${format}`, '')
+        this.files[i] = {
+          raw: files[i],
+          source,
+          format,
+          name
         }
-        reader.readAsText(files[i], this.encoding)
-        file.format = files[i].name.replace(/.*\./, '')
-        file.name = files[i].name.replace(`.${file.format}`, '')
-        this.files[i] = file
       }
       if (this.files.length > 1) {
         this.dialog = true
@@ -152,6 +160,7 @@ export default {
         show: true,
         text: '字幕导入成功'
       }
+      this.resultSync()
     },
     async downFile () {
       const { files, outputFormat } = this
@@ -164,7 +173,7 @@ export default {
           }
           continue
         }
-        const result = this.getResult(file.source, file.format)
+        const result = file.result || this.getResult(file.source, file.format)
         let outputBlob
         if (outputFormat === 'docx') {
           try {
@@ -195,7 +204,6 @@ export default {
       return new Promise((resolve, reject) => {
         JSZipUtils.getBinaryContent('template.docx', (err, content) => {
           if (err) return reject(err)
-          console.log(content)
           const zip = new JSZip(content)
           const doc = new Docxtemplater().loadZip(zip)
           doc.setData({
@@ -207,22 +215,30 @@ export default {
             type: 'blob',
             mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           })
-          console.log(output)
           resolve(output)
         })
       })
     },
     scrollSync (e) {
-      clearTimeout(scrollTimer)
+      clearTimeout(this.scrollTimer)
       const { scrollTop, scrollHeight } = e.target
       const scrollRatio = scrollTop / scrollHeight
       const { source, result } = this.$refs
       const follower = e.target === source ? result : source
       follower.removeEventListener('scroll', this.scrollSync)
       follower.scrollTop = follower.scrollHeight * scrollRatio
-      scrollTimer = setTimeout(() => {
+      this.scrollTimer = setTimeout(() => {
         follower.addEventListener('scroll', this.scrollSync)
       }, 300)
+    },
+    sourceSync () {
+      const file = this.files[0]
+      this.$set(this.files, 0, { ...file, source: file.result })
+    },
+    resultSync () {
+      const file = this.files[0]
+      const result = this.getResult(file.source, file.format)
+      this.$set(this.files, 0, { ...file, result })
     }
   }
 }
@@ -235,9 +251,10 @@ export default {
 }
 
 .main {
-  flex: 1;
+  height: 100%;
   display: flex;
 }
+
 .source, .result {
   flex: 1;
   padding: 5px 10px;
@@ -253,13 +270,25 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, .1), 0 1px 2px rgba(0, 0, 0, .1);
   background-color: rgba(255, 255, 255, .9);
 }
-.result.holder {
-  color: #888;
+
+.file-btn {
+  right: 52% !important;
+}
+
+.file-btn input {
+  width: 56px;
+  height: 56px;
+  position: absolute;
+  opacity: 0;
 }
 
 @media screen and (max-width: 600px) {
   .main {
     flex-direction: column;
+  }
+  .file-btn {
+    right: 16px !important;
+    bottom: 48% !important;
   }
 }
 </style>
