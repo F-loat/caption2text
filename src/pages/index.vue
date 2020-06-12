@@ -1,7 +1,7 @@
 <template>
   <v-app v-resize="resizeHandler">
     <v-app-bar app dark color="primary">
-      <v-toolbar-title class="white--text">字幕转文本工具</v-toolbar-title>
+      <v-toolbar-title class="white--text">字幕转换工具</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon dark @click="sourceSync" v-text="'<-'" />
       <v-btn text dark @click="switchEncoding">{{encoding}}</v-btn>
