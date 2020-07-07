@@ -3,9 +3,9 @@
     <v-app-bar app dark color="primary">
       <v-toolbar-title class="white--text">字幕转换工具</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon dark @click="sourceSync" v-text="'<-'" />
+      <v-btn icon dark @click="syncSource" v-text="'<-'" />
       <v-btn text dark @click="switchEncoding">{{encoding}}</v-btn>
-      <v-btn icon dark>{{files[0].format}}</v-btn>
+      <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
           <v-icon>mdi-github</v-icon>
@@ -20,7 +20,7 @@
           v-model="files[0].source"
           placeholder="支持多文件拖入"
           spellcheck="false"
-          @input="resultSync"
+          @input="syncResult"
         />
         <textarea
           ref="result"
@@ -111,8 +111,8 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      this.$refs.source.addEventListener('scroll', this.scrollSync)
-      this.$refs.result.addEventListener('scroll', this.scrollSync)
+      this.$refs.source.addEventListener('scroll', this.syncScroll)
+      this.$refs.result.addEventListener('scroll', this.syncScroll)
       /* eslint-disable-next-line no-new */
       new MaterialImage()
     })
@@ -122,9 +122,11 @@ export default {
       if (format === 'srt') {
         return source
           .replace(/(\d+:?){3},\d+ --> (\d+:?){3},\d?/g, '')
-          .replace(/\d+\s*\n/g, '')
+          .replace(/\d+/g, '')
           .replace(/{\\an.*}/g, '')
           .replace(/{\\pos.*}/g, '')
+          .replace(/(\s*\n){3,}/g, '\n\n')
+          .trim()
       } else if (format === 'ass') {
         return source
           .replace(/[^]*\[Events\]\s*/, '')
@@ -133,6 +135,7 @@ export default {
           .replace(/{.*?}/g, '')
           .replace(/\\N/g, '\n')
           .replace(/(\s*\n){3,}/g, '\n\n')
+          .trim()
       } else if (format === 'txt') {
         return source
           .replace(/(，|。|\.)+/g, '\n')
@@ -152,6 +155,15 @@ export default {
           files: [file.raw]
         }
       })
+    },
+    switchFormat () {
+      const file = this.files[0]
+      if (file.format === 'srt') {
+        file.format = 'ass'
+      } else if (file.format === 'ass') {
+        file.format = 'srt'
+      }
+      this.syncResult()
     },
     async dropFile (e) {
       const files = e.target.files || e.dataTransfer.files
@@ -173,7 +185,7 @@ export default {
         show: true,
         text: '字幕导入成功'
       }
-      this.resultSync()
+      this.syncResult()
     },
     async downFile () {
       const { files, outputFormat } = this
@@ -232,23 +244,23 @@ export default {
         })
       })
     },
-    scrollSync (e) {
+    syncScroll (e) {
       clearTimeout(this.scrollTimer)
       const { scrollTop, scrollHeight } = e.target
       const scrollRatio = scrollTop / scrollHeight
       const { source, result } = this.$refs
       const follower = e.target === source ? result : source
-      follower.removeEventListener('scroll', this.scrollSync)
+      follower.removeEventListener('scroll', this.syncScroll)
       follower.scrollTop = follower.scrollHeight * scrollRatio
       this.scrollTimer = setTimeout(() => {
-        follower.addEventListener('scroll', this.scrollSync)
+        follower.addEventListener('scroll', this.syncScroll)
       }, 300)
     },
-    sourceSync () {
+    syncSource () {
       const file = this.files[0]
       this.$set(this.files, 0, { ...file, source: file.result })
     },
-    resultSync () {
+    syncResult () {
       const file = this.files[0]
       const result = this.getResult(file.source, file.format)
       this.$set(this.files, 0, { ...file, result })
