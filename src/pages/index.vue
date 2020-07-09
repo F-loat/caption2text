@@ -150,7 +150,7 @@ export default {
       const file = this.files[0]
       if (!file.raw) return
       this.dropFile({
-        dataTransfer: {
+        target: {
           files: [file.raw]
         }
       })
