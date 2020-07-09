@@ -121,8 +121,7 @@ export default {
     getResult (source = '', format) {
       if (format === 'srt') {
         return source
-          .replace(/(\d+:?){3},\d+ --> (\d+:?){3},\d?/g, '')
-          .replace(/\d+/g, '')
+          .replace(/\d+\s*(\d+:?){3},\d* --> (\d+:?){3},\d*/g, '')
           .replace(/{\\an.*}/g, '')
           .replace(/{\\pos.*}/g, '')
           .replace(/(\s*\n){3,}/g, '\n\n')
