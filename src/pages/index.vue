@@ -6,13 +6,16 @@
       <v-btn icon dark @click="syncSource" v-text="'<-'" />
       <v-btn text dark @click="switchEncoding">{{encoding}}</v-btn>
       <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
+      <v-btn icon dark @click="switchInvert">
+        <v-icon>mdi-call-split</v-icon>
+      </v-btn>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
           <v-icon>mdi-github</v-icon>
         </v-btn>
       </a>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <div class="main" @drop.prevent="dropFile">
         <textarea
           ref="source"
@@ -37,7 +40,7 @@
       <v-btn color="secondary" dark fixed bottom right fab @click.stop="dialog = true">
         <v-icon>mdi-arrow-down</v-icon>
       </v-btn>
-    </v-content>
+    </v-main>
     <v-dialog v-model="dialog" max-width="500px">
       <v-card>
         <v-card-title>导出文本</v-card-title>
@@ -86,6 +89,14 @@ const readFile = (f, e) => new Promise((resolve) => {
   reader.readAsText(f, e)
 })
 
+const invertText = (text, invert) => {
+  if (!invert) return text
+  return text
+    .split('\n\n')
+    .map(item => item.split('\n').reduce((rst, p) => [p, ...rst], []).join('\n'))
+    .join('\n\n')
+}
+
 export default {
   name: 'Index',
   data () {
@@ -96,6 +107,7 @@ export default {
       },
       encoding: 'utf-8',
       outputFormat: 'docx',
+      needInvert: false,
       files: [{
         format: 'ass',
         source: '',
@@ -119,15 +131,17 @@ export default {
   },
   methods: {
     getResult (source = '', format) {
+      const { needInvert } = this
       if (format === 'srt') {
-        return source
+        const result = source
           .replace(/\d+\s*(\d+:?){3},\d* --> (\d+:?){3},\d*/g, '')
           .replace(/{\\an.*}/g, '')
           .replace(/{\\pos.*}/g, '')
           .replace(/(\s*\n){3,}/g, '\n\n')
           .trim()
+        return invertText(result, needInvert)
       } else if (format === 'ass') {
-        return source
+        const result = source
           .replace(/[^]*\[Events\]\s*/, '')
           .replace(/Format:.*\s*/, '')
           .replace(/Dialogue.*,,(.*p0})?/g, '\n')
@@ -135,6 +149,7 @@ export default {
           .replace(/\\N/g, '\n')
           .replace(/(\s*\n){3,}/g, '\n\n')
           .trim()
+        return invertText(result, needInvert)
       } else if (format === 'txt') {
         return source
           .replace(/(，|。|\.)+/g, '\n')
@@ -162,6 +177,10 @@ export default {
       } else if (file.format === 'ass') {
         file.format = 'srt'
       }
+      this.syncResult()
+    },
+    switchInvert () {
+      this.needInvert = !this.needInvert
       this.syncResult()
     },
     async dropFile (e) {
