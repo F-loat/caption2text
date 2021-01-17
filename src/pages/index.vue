@@ -46,10 +46,12 @@
         <v-card-title>导出文本</v-card-title>
         <v-card-text>
           <v-text-field
-            v-for="file of files" :key="file.name"
             label="文件名"
-            v-model="file.name"
+            v-for="file of files"
+            :key="file.name"
+            :value="file.name"
             :suffix="`.${outputFormat}`"
+            @blur="e => file.name = e.target.value"
           />
           <v-radio-group label="文件格式" v-model="outputFormat" row>
             <v-radio label="Word" value="docx"></v-radio>
@@ -222,6 +224,7 @@ export default {
           try {
             outputBlob = await this.generateDoc(result)
           } catch (err) {
+            console.log(err)
             if (err) {
               this.snackbar = {
                 show: true,
