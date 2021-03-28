@@ -16,7 +16,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/caption2text/img/screenshot.png"
   },
   {
-    "revision": "4f83920281e8619c1b8fc549d8bb7c96",
+    "revision": "ce94bb2610b47d9c70a197ada6b6deb9",
     "url": "/caption2text/index.html"
   },
   {
