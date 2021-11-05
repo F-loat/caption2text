@@ -9,6 +9,11 @@
       <v-btn icon dark @click="switchInvert">
         <v-icon>mdi-call-split</v-icon>
       </v-btn>
+      <a href="https://img.alicdn.com/imgextra/i2/O1CN01VhAWVx25SV6pfoc7C_!!6000000007525-0-tps-720-720.jpg" target="_blank">
+        <v-btn icon dark>
+          <v-icon>mdi-arm-flex</v-icon>
+        </v-btn>
+      </a>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
           <v-icon>mdi-github</v-icon>

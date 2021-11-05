@@ -36,5 +36,5 @@ npm run serve
 ## 赞赏
 
 <p>
-  <img alt="微信" src="./public/img/admire.jpg?raw=true" width="24%" />
+  <img alt="微信" src="https://img.alicdn.com/imgextra/i2/O1CN01VhAWVx25SV6pfoc7C_!!6000000007525-0-tps-720-720.jpg" width="24%" />
 </p>
