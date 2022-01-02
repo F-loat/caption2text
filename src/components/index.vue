@@ -4,16 +4,48 @@
       <v-toolbar-title class="white--text">字幕转换工具</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon dark @click="syncSource" v-text="'<-'" />
-      <v-btn text dark @click="switchEncoding">{{encoding}}</v-btn>
-      <v-btn icon dark @click="switchFormat">{{files[0].format}}</v-btn>
-      <v-btn icon dark @click="switchInvert">
-        <v-icon>mdi-call-split</v-icon>
-      </v-btn>
-      <a href="https://img.alicdn.com/imgextra/i2/O1CN01VhAWVx25SV6pfoc7C_!!6000000007525-0-tps-720-720.jpg" target="_blank">
-        <v-btn icon dark>
-          <v-icon>mdi-arm-flex</v-icon>
-        </v-btn>
-      </a>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn text dark @click="switchEncoding" v-bind="attrs" v-on="on">
+            {{encoding}}
+          </v-btn>
+        </template>
+        <span>编码切换</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon dark @click="switchFormat" v-bind="attrs" v-on="on">
+            {{files[0].format}}
+          </v-btn>
+        </template>
+        <span>格式切换</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon dark @click="switchInvert" v-bind="attrs" v-on="on">
+            <v-icon>mdi-call-split</v-icon>
+          </v-btn>
+        </template>
+        <span>顺序切换</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon dark @click="switchRange" v-bind="attrs" v-on="on">
+            <v-icon>mdi-google-translate</v-icon>
+          </v-btn>
+        </template>
+        <span>范围切换</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <a href="https://img.alicdn.com/imgextra/i2/O1CN01VhAWVx25SV6pfoc7C_!!6000000007525-0-tps-720-720.jpg" target="_blank" v-bind="attrs" v-on="on">
+            <v-btn icon dark>
+              <v-icon>mdi-arm-flex</v-icon>
+            </v-btn>
+          </a>
+        </template>
+        <span>赞赏</span>
+      </v-tooltip>
       <a href="https://github.com/F-loat/caption2text" target="_blank">
         <v-btn icon dark>
           <v-icon>mdi-github</v-icon>
@@ -96,12 +128,18 @@ const readFile = (f, e) => new Promise((resolve) => {
   reader.readAsText(f, e)
 })
 
-const invertText = (text, invert) => {
-  if (!invert) return text
-  return text
-    .split('\n\n')
-    .map(item => item.split('\n').reduce((rst, p) => [p, ...rst], []).join('\n'))
-    .join('\n\n')
+const invertText = (text, invert, range) => {
+  let result = text.split('\n\n')
+
+  if (range === 'all' && invert) {
+    result = result.map(item => item.split('\n').reduce((rst, p) => [p, ...rst], []).join('\n'))
+  } else if (range === 'main') {
+    result = result.map(item => item.split('\n')[0])
+  } else if (range === 'sub') {
+    result = result.map(item => item.split('\n')[1])
+  }
+
+  return result.join('\n\n')
 }
 
 export default {
@@ -114,7 +152,8 @@ export default {
       },
       encoding: 'utf-8',
       outputFormat: 'docx',
-      needInvert: false,
+      outputRange: 'all',
+      outputInvert: false,
       files: [{
         format: 'ass',
         source: '',
@@ -138,7 +177,8 @@ export default {
   },
   methods: {
     getResult (source = '', format) {
-      const { needInvert } = this
+      const { outputInvert, outputRange } = this
+
       if (format === 'srt') {
         const result = source
           .replace(/\d+\s*(\d+:?){3},\d* --> (\d+:?){3},\d*/g, '')
@@ -146,7 +186,7 @@ export default {
           .replace(/{\\pos.*}/g, '')
           .replace(/(\s*\n){3,}/g, '\n\n')
           .trim()
-        return invertText(result, needInvert)
+        return invertText(result, outputInvert, outputRange)
       } else if (format === 'ass') {
         const result = source
           .replace(/[^]*\[Events\]\s*/, '')
@@ -156,7 +196,7 @@ export default {
           .replace(/\\N/g, '\n')
           .replace(/(\s*\n){3,}/g, '\n\n')
           .trim()
-        return invertText(result, needInvert)
+        return invertText(result, outputInvert, outputRange)
       } else if (format === 'txt') {
         return source
           .replace(/(，|。|\.)+/g, '\n')
@@ -187,7 +227,18 @@ export default {
       this.syncResult()
     },
     switchInvert () {
-      this.needInvert = !this.needInvert
+      this.outputInvert = !this.outputInvert
+      this.syncResult()
+    },
+    switchRange () {
+      const { outputRange } = this
+      if (outputRange === 'all') {
+        this.outputRange = 'main'
+      } else if (outputRange === 'main') {
+        this.outputRange = 'sub'
+      } else {
+        this.outputRange = 'all'
+      }
       this.syncResult()
     },
     async dropFile (e) {
@@ -324,6 +375,7 @@ export default {
 
 .file-btn {
   right: 52% !important;
+  cursor: pointer;
 }
 
 .file-btn input {
