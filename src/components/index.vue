@@ -187,7 +187,7 @@ export default {
           .replace(/(\s*\n){3,}/g, '\n\n')
           .trim()
         return invertText(result, outputInvert, outputRange)
-      } else if (format === 'ass') {
+      } else if (format === 'ass' || format === 'ssa') {
         const result = source
           .replace(/[^]*\[Events\]\s*/, '')
           .replace(/Format:.*\s*/, '')
