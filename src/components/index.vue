@@ -179,7 +179,7 @@ export default {
     getResult (source = '', format) {
       const { outputInvert, outputRange } = this
 
-      if (format === 'srt') {
+      if (format === 'srt' || format === 'vtt') {
         const result = source
           .replace(/\d+\s*(\d+:?){3},\d* --> (\d+:?){3},\d*/g, '')
           .replace(/{\\an.*}/g, '')
